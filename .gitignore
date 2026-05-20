@@ -1,12 +1,14 @@
 .DS_Store
 *.swp
 *.tmp
+__pycache__/
+*.pyc
 
 # Never commit local secrets or machine-only overrides.
 .env
 .env.*
 secrets/
+home/.claude/settings.json
 **/settings.local.json
 **/*.local
 **/*.local.*
-

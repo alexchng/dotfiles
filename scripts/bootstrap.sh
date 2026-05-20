@@ -5,6 +5,7 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HOME_DIR="${HOME:?HOME is not set}"
 DRY_RUN=false
 FORCE=false
+CONFIGURE_CLAUDE_SETTINGS=true
 BACKUP_DIR="$HOME_DIR/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
 
 usage() {
@@ -14,9 +15,10 @@ Usage: scripts/bootstrap.sh [options]
 Links files from ./home into $HOME.
 
 Options:
-  --dry-run   Show actions without changing files
-  --force     Back up and replace existing files
-  -h, --help  Show this help
+  --dry-run                Show actions without changing files
+  --force                  Back up and replace existing files
+  --skip-claude-settings   Do not merge Claude Code model preferences
+  -h, --help               Show this help
 USAGE
 }
 
@@ -32,6 +34,64 @@ run() {
   else
     "$@"
   fi
+}
+
+shell_hook_block() {
+  cat <<'HOOK'
+
+# >>> dotfiles shell setup >>>
+for file in "$HOME/.config/dotfiles/shell/env.sh" "$HOME/.config/dotfiles/shell/aliases.sh"; do
+  [ -r "$file" ] && . "$file"
+done
+# <<< dotfiles shell setup <<<
+HOOK
+}
+
+append_shell_hook() {
+  local target="$1"
+  local begin_marker="# >>> dotfiles shell setup >>>"
+
+  if [ ! -e "$target" ]; then
+    return
+  fi
+
+  if [ -L "$target" ]; then
+    log "skip shell hook $target (symlink)"
+    return
+  fi
+
+  if grep -Fq "$begin_marker" "$target"; then
+    log "shell hook already present in $target"
+    return
+  fi
+
+  if "$DRY_RUN"; then
+    log "dry-run: append dotfiles shell hook to $target"
+  else
+    shell_hook_block >> "$target"
+  fi
+  log "append dotfiles shell hook to $target"
+}
+
+configure_claude_settings() {
+  local script="$DOTFILES_DIR/scripts/configure-claude-settings.py"
+  local args=()
+
+  if [ ! -x "$script" ]; then
+    log "skip Claude settings merge ($script is not executable)"
+    return
+  fi
+
+  if ! command -v python3 >/dev/null 2>&1; then
+    log "skip Claude settings merge (python3 is not available)"
+    return
+  fi
+
+  if "$DRY_RUN"; then
+    args+=(--dry-run)
+  fi
+
+  "$script" "${args[@]}"
 }
 
 backup_target() {
@@ -83,6 +143,9 @@ while [ "$#" -gt 0 ]; do
     --force)
       FORCE=true
       ;;
+    --skip-claude-settings)
+      CONFIGURE_CLAUDE_SETTINGS=false
+      ;;
     -h|--help)
       usage
       exit 0
@@ -104,5 +167,12 @@ fi
 while IFS= read -r -d '' source; do
   link_file "$source"
 done < <(find "$DOTFILES_DIR/home" -type f -print0)
+
+append_shell_hook "$HOME_DIR/.zshrc"
+append_shell_hook "$HOME_DIR/.bashrc"
+
+if "$CONFIGURE_CLAUDE_SETTINGS"; then
+  configure_claude_settings
+fi
 
 log "Done. Run scripts/doctor.sh to check the setup."

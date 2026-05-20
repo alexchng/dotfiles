@@ -19,6 +19,10 @@ is intentionally conservative:
 - existing files are skipped by default
 - `--dry-run` shows what would happen
 - `--force` backs up replaced files under `~/.dotfiles-backup/`
+- existing `.zshrc` and `.bashrc` files get a small managed source block
+  appended so aliases and environment preferences still load
+- real `~/.claude/settings.json` is edited in place, not symlinked, so managed
+  tokens stay out of the repo
 
 This repo does not install system packages or global tools. It assumes the
 remote workspace image already provides tools such as `git`, `tmux`, `mise`, and
@@ -53,12 +57,19 @@ t
 This repo includes personal Claude Code files in `home/.claude/`:
 
 - `CLAUDE.md` for global memory and working preferences
-- `settings.json` for personal Claude Code settings
+- `settings.example.json` as a non-secret example of desired settings
 - `commands/` for custom slash commands
 
-Keep secrets and machine-specific values out of this repo. Use local files such
-as project-level `.claude/settings.local.json`, shell environment files, or your
-password manager for credentials.
+During bootstrap, `scripts/configure-claude-settings.py` merges a small set of
+safe model preferences into the real `~/.claude/settings.json`:
+
+- default model: `sonnet`
+- Sonnet alias target: `bedrock.claude-sonnet-4-6`
+- model override: `claude-sonnet-4-6` to `bedrock.claude-sonnet-4-6`
+
+Keep secrets and machine-specific values out of this repo. The real Claude
+settings file may contain managed auth tokens, so it should stay local to the
+workspace.
 
 ## Airdocs Workspace
 
