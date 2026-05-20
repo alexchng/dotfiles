@@ -1,0 +1,12 @@
+.DS_Store
+*.swp
+*.tmp
+
+# Never commit local secrets or machine-only overrides.
+.env
+.env.*
+secrets/
+**/settings.local.json
+**/*.local
+**/*.local.*
+
