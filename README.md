@@ -21,8 +21,28 @@ is intentionally conservative:
 - `--force` backs up replaced files under `~/.dotfiles-backup/`
 - existing `.zshrc` and `.bashrc` files get a small managed source block
   appended so aliases and environment preferences still load
+- an existing real `.tmux.conf` gets a managed `source-file` block appended;
+  existing tmux symlinks are left alone unless `--force` is used
 - real `~/.claude/settings.json` is edited in place, not symlinked, so managed
   tokens stay out of the repo
+
+`--force` applies to every linked file under `home/`, not just tmux. If a
+destination file already exists, it is moved to `~/.dotfiles-backup/<timestamp>/`
+before the dotfiles symlink is created. This can replace files such as:
+
+- `~/.tmux.conf`
+- `~/.zshrc`
+- `~/.bashrc`
+- `~/.gitconfig`
+- `~/.config/git/ignore`
+- `~/.config/dotfiles/shell/env.sh`
+- `~/.claude/CLAUDE.md`
+- `~/.claude/commands/*.md`
+
+The real Claude settings file, `~/.claude/settings.json`, is the exception: it
+is not linked from `home/`, so `--force` does not replace it. Bootstrap merges
+safe model preferences into that file in place unless
+`--skip-claude-settings` is used.
 
 This repo does not install system packages or global tools. It assumes the
 remote workspace image already provides tools such as `git`, `tmux`, `mise`, and

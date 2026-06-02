@@ -73,6 +73,37 @@ append_shell_hook() {
   log "append dotfiles shell hook to $target"
 }
 
+append_tmux_hook() {
+  local target="$HOME_DIR/.tmux.conf"
+  local source="$DOTFILES_DIR/home/.tmux.conf"
+  local begin_marker="# >>> dotfiles tmux setup >>>"
+
+  if [ -L "$target" ]; then
+    log "skip tmux hook $target (symlink)"
+    return
+  fi
+
+  if [ ! -e "$target" ]; then
+    return
+  fi
+
+  if grep -Fq "$begin_marker" "$target"; then
+    log "tmux hook already present in $target"
+    return
+  fi
+
+  if "$DRY_RUN"; then
+    log "dry-run: append dotfiles tmux hook to $target"
+  else
+    {
+      printf '\n%s\n' "$begin_marker"
+      printf 'source-file "%s"\n' "$source"
+      printf '%s\n' "# <<< dotfiles tmux setup <<<"
+    } >> "$target"
+  fi
+  log "append dotfiles tmux hook to $target"
+}
+
 configure_claude_settings() {
   local script="$DOTFILES_DIR/scripts/configure-claude-settings.py"
   local args=()
@@ -166,10 +197,11 @@ fi
 
 while IFS= read -r -d '' source; do
   link_file "$source"
-done < <(find "$DOTFILES_DIR/home" -type f -print0)
+done < <(find "$DOTFILES_DIR/home" -type f ! -name '.DS_Store' -print0)
 
 append_shell_hook "$HOME_DIR/.zshrc"
 append_shell_hook "$HOME_DIR/.bashrc"
+append_tmux_hook
 
 if "$CONFIGURE_CLAUDE_SETTINGS"; then
   configure_claude_settings

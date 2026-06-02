@@ -42,6 +42,6 @@ check_command claude
 
 while IFS= read -r -d '' source; do
   check_link "$source"
-done < <(find "$DOTFILES_DIR/home" -type f -print0)
+done < <(find "$DOTFILES_DIR/home" -type f ! -name '.DS_Store' -print0)
 
 exit "$status"
