@@ -3,6 +3,8 @@ set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HOME_DIR="${HOME:?HOME is not set}"
+source "$DOTFILES_DIR/scripts/lib/logging.sh"
+
 DRY_RUN=false
 FORCE=false
 CONFIGURE_CLAUDE_SETTINGS=true
@@ -16,21 +18,17 @@ Links files from ./home into $HOME.
 
 Options:
   --dry-run                Show actions without changing files
-  --force                  Back up and replace existing files
+  --force                  Back up and replace existing ~/.tmux.conf only
   --skip-claude-settings   Do not merge Claude Code model preferences
+  --no-log                 Do not write a log file
+  --log-file PATH          Write the log to PATH
   -h, --help               Show this help
 USAGE
 }
 
-log() {
-  printf '%s\n' "$*"
-}
-
 run() {
   if "$DRY_RUN"; then
-    printf 'dry-run:'
-    printf ' %q' "$@"
-    printf '\n'
+    log_command dry-run: "$@"
   else
     "$@"
   fi
@@ -47,9 +45,19 @@ done
 HOOK
 }
 
-append_shell_hook() {
+shell_hook_present() {
   local target="$1"
   local begin_marker="# >>> dotfiles shell setup >>>"
+
+  grep -Fq "$begin_marker" "$target" ||
+    (grep -Fq "$HOME/.config/dotfiles/shell/env.sh" "$target" &&
+      grep -Fq "$HOME/.config/dotfiles/shell/aliases.sh" "$target") ||
+    (grep -Fq '$HOME/.config/dotfiles/shell/env.sh' "$target" &&
+      grep -Fq '$HOME/.config/dotfiles/shell/aliases.sh' "$target")
+}
+
+append_shell_hook() {
+  local target="$1"
 
   if [ ! -e "$target" ]; then
     return
@@ -60,8 +68,8 @@ append_shell_hook() {
     return
   fi
 
-  if grep -Fq "$begin_marker" "$target"; then
-    log "shell hook already present in $target"
+  if shell_hook_present "$target"; then
+    log "shell hook already present in $target; skip append"
     return
   fi
 
@@ -71,6 +79,51 @@ append_shell_hook() {
     shell_hook_block >> "$target"
   fi
   log "append dotfiles shell hook to $target"
+}
+
+git_hook_block() {
+  local source="$DOTFILES_DIR/home/.gitconfig"
+
+  cat <<HOOK
+
+# >>> dotfiles git setup >>>
+[include]
+	path = $source
+# <<< dotfiles git setup <<<
+HOOK
+}
+
+git_hook_present() {
+  local target="$1"
+  local begin_marker="# >>> dotfiles git setup >>>"
+  local source="$DOTFILES_DIR/home/.gitconfig"
+
+  grep -Fq "$begin_marker" "$target" || grep -Fq "path = $source" "$target"
+}
+
+append_git_hook() {
+  local target="$HOME_DIR/.gitconfig"
+
+  if [ ! -e "$target" ]; then
+    return
+  fi
+
+  if [ -L "$target" ]; then
+    log "skip git hook $target (symlink)"
+    return
+  fi
+
+  if git_hook_present "$target"; then
+    log "git hook already present in $target; skip append"
+    return
+  fi
+
+  if "$DRY_RUN"; then
+    log "dry-run: append dotfiles git hook to $target"
+  else
+    git_hook_block >> "$target"
+  fi
+  log "append dotfiles git hook to $target"
 }
 
 append_tmux_hook() {
@@ -107,6 +160,8 @@ append_tmux_hook() {
 configure_claude_settings() {
   local script="$DOTFILES_DIR/scripts/configure-claude-settings.py"
   local args=()
+  local output
+  local status
 
   if [ ! -x "$script" ]; then
     log "skip Claude settings merge ($script is not executable)"
@@ -122,7 +177,19 @@ configure_claude_settings() {
     args+=(--dry-run)
   fi
 
-  "$script" "${args[@]}"
+  if output="$("$script" "${args[@]}" 2>&1)"; then
+    status=0
+  else
+    status=$?
+  fi
+
+  if [ -n "$output" ]; then
+    while IFS= read -r line; do
+      log "$line"
+    done <<< "$output"
+  fi
+
+  return "$status"
 }
 
 backup_target() {
@@ -154,10 +221,14 @@ link_file() {
   fi
 
   if [ -e "$target" ] || [ -L "$target" ]; then
-    if "$FORCE"; then
+    if "$FORCE" && [ "$relative" = ".tmux.conf" ]; then
       backup_target "$target"
     else
-      log "skip $target (exists; use --force to replace)"
+      if [ "$relative" = ".tmux.conf" ]; then
+        log "skip $target (exists; use --force to replace tmux config)"
+      else
+        log "skip $target (exists; leaving in place)"
+      fi
       return
     fi
   fi
@@ -177,6 +248,17 @@ while [ "$#" -gt 0 ]; do
     --skip-claude-settings)
       CONFIGURE_CLAUDE_SETTINGS=false
       ;;
+    --no-log)
+      LOG_ENABLED=false
+      ;;
+    --log-file)
+      if [ "$#" -lt 2 ]; then
+        echo "--log-file requires a path" >&2
+        exit 2
+      fi
+      LOG_FILE="$2"
+      shift
+      ;;
     -h|--help)
       usage
       exit 0
@@ -190,6 +272,8 @@ while [ "$#" -gt 0 ]; do
   shift
 done
 
+init_logging "bootstrap"
+
 if [ ! -d "$DOTFILES_DIR/home" ]; then
   log "No home/ directory found; nothing to link."
   exit 0
@@ -201,6 +285,7 @@ done < <(find "$DOTFILES_DIR/home" -type f ! -name '.DS_Store' -print0)
 
 append_shell_hook "$HOME_DIR/.zshrc"
 append_shell_hook "$HOME_DIR/.bashrc"
+append_git_hook
 append_tmux_hook
 
 if "$CONFIGURE_CLAUDE_SETTINGS"; then

@@ -18,30 +18,27 @@ is intentionally conservative:
 
 - existing files are skipped by default
 - `--dry-run` shows what would happen
-- `--force` backs up replaced files under `~/.dotfiles-backup/`
+- `--force` backs up and replaces `~/.tmux.conf` only
 - existing `.zshrc` and `.bashrc` files get a small managed source block
   appended so aliases and environment preferences still load
+- an existing real `.gitconfig` gets a managed include block appended so Git
+  preferences still load
 - an existing real `.tmux.conf` gets a managed `source-file` block appended;
   existing tmux symlinks are left alone unless `--force` is used
 - real `~/.claude/settings.json` is edited in place, not symlinked, so managed
   tokens stay out of the repo
 
-`--force` applies to every linked file under `home/`, not just tmux. If a
-destination file already exists, it is moved to `~/.dotfiles-backup/<timestamp>/`
-before the dotfiles symlink is created. This can replace files such as:
-
-- `~/.tmux.conf`
-- `~/.zshrc`
-- `~/.bashrc`
-- `~/.gitconfig`
-- `~/.config/git/ignore`
-- `~/.config/dotfiles/shell/env.sh`
-- `~/.claude/CLAUDE.md`
-- `~/.claude/commands/*.md`
+`--force` is intentionally scoped to tmux. If `~/.tmux.conf` already exists, it
+is moved to `~/.dotfiles-backup/<timestamp>/.tmux.conf` before the dotfiles
+symlink is created. Existing `~/.zshrc`, `~/.bashrc`, and `~/.gitconfig` files
+are not replaced; bootstrap appends managed blocks if the same settings are not
+already present. Other existing files under `home/`, such as
+`~/.claude/CLAUDE.md` and Claude command files, are still skipped and left in
+place.
 
 The real Claude settings file, `~/.claude/settings.json`, is the exception: it
-is not linked from `home/`, so `--force` does not replace it. Bootstrap merges
-safe model preferences into that file in place unless
+is not linked from `home/`, so `--force` does not replace it either. Bootstrap
+merges safe model preferences into that file in place unless
 `--skip-claude-settings` is used.
 
 This repo does not install system packages or global tools. It assumes the
@@ -65,6 +62,38 @@ git clone <this-repo-url> ~/.dotfiles
 ~/.dotfiles/scripts/bootstrap.sh
 ~/.dotfiles/scripts/doctor.sh
 ```
+
+## Logs
+
+`bootstrap.sh` and `doctor.sh` print to the terminal and also write timestamped
+logs by default:
+
+```text
+~/.dotfiles/logs/bootstrap-YYYYMMDD-HHMMSS.log
+~/.dotfiles/logs/doctor-YYYYMMDD-HHMMSS.log
+```
+
+Log files include timestamps on each line. Use `--no-log` to print only to the
+terminal, or `--log-file PATH` to choose a specific log file:
+
+```sh
+~/.dotfiles/scripts/bootstrap.sh --no-log
+~/.dotfiles/scripts/bootstrap.sh --log-file /tmp/bootstrap.log
+~/.dotfiles/scripts/doctor.sh --log-file /tmp/doctor.log
+```
+
+## Git Identity
+
+The default dotfiles Git config includes `~/.config/git/tech.gitconfig`, which
+sets your Tech/GovTech identity:
+
+```ini
+[user]
+	name = Alex Chng
+	email = alex_chng@tech.gov.sg
+```
+
+Use repo-local Git config when a project needs a different identity.
 
 After bootstrapping, start or attach to your default tmux session with:
 
@@ -112,3 +141,6 @@ Useful options:
 ~/.dotfiles/scripts/workspaces/airdocs.sh --skip-claude
 ~/.dotfiles/scripts/workspaces/airdocs.sh --force-dotfiles
 ```
+
+`--force-dotfiles` passes the scoped `--force` behavior through to
+`bootstrap.sh`, so it only replaces an existing `~/.tmux.conf`.

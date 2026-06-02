@@ -3,19 +3,33 @@ set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HOME_DIR="${HOME:?HOME is not set}"
+source "$DOTFILES_DIR/scripts/lib/logging.sh"
+
 status=0
+
+usage() {
+  cat <<USAGE
+Usage: scripts/doctor.sh [options]
+
+Checks command availability and dotfile links.
+
+Options:
+$(logging_usage_options)
+  -h, --help       Show this help
+USAGE
+}
 
 check_command() {
   local command_name="$1"
   local required="${2:-optional}"
 
   if command -v "$command_name" >/dev/null 2>&1; then
-    printf 'ok   command %s\n' "$command_name"
+    log "ok   command $command_name"
   elif [ "$required" = "required" ]; then
-    printf 'miss command %s (required)\n' "$command_name"
+    log "miss command $command_name (required)"
     status=1
   else
-    printf 'skip command %s (not available)\n' "$command_name"
+    log "skip command $command_name (not available)"
   fi
 }
 
@@ -25,14 +39,67 @@ check_link() {
   local target="$HOME_DIR/$relative"
 
   if [ -L "$target" ] && [ "$(readlink "$target")" = "$source" ]; then
-    printf 'ok   link %s\n' "$target"
+    log "ok   link $target"
+  elif [ "$relative" = ".zshrc" ] || [ "$relative" = ".bashrc" ]; then
+    if [ -f "$target" ] &&
+      (grep -Fq "# >>> dotfiles shell setup >>>" "$target" ||
+        (grep -Fq "$HOME/.config/dotfiles/shell/env.sh" "$target" &&
+          grep -Fq "$HOME/.config/dotfiles/shell/aliases.sh" "$target") ||
+        (grep -Fq '$HOME/.config/dotfiles/shell/env.sh' "$target" &&
+          grep -Fq '$HOME/.config/dotfiles/shell/aliases.sh' "$target")); then
+      log "ok   hook $target"
+    else
+      log "warn exists but not linked $target"
+    fi
+  elif [ "$relative" = ".gitconfig" ]; then
+    if [ -f "$target" ] &&
+      (grep -Fq "# >>> dotfiles git setup >>>" "$target" ||
+        grep -Fq "path = $source" "$target"); then
+      log "ok   hook $target"
+    else
+      log "warn exists but not linked $target"
+    fi
+  elif [ "$relative" = ".tmux.conf" ]; then
+    if [ -f "$target" ] && grep -Fq "# >>> dotfiles tmux setup >>>" "$target"; then
+      log "ok   hook $target"
+    else
+      log "warn exists but not linked $target"
+    fi
   elif [ -e "$target" ] || [ -L "$target" ]; then
-    printf 'warn exists but not linked %s\n' "$target"
+    log "warn exists but not linked $target"
   else
-    printf 'miss link %s\n' "$target"
+    log "miss link $target"
     status=1
   fi
 }
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --no-log)
+      LOG_ENABLED=false
+      ;;
+    --log-file)
+      if [ "$#" -lt 2 ]; then
+        echo "--log-file requires a path" >&2
+        exit 2
+      fi
+      LOG_FILE="$2"
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      printf 'Unknown option: %s\n\n' "$1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+  shift
+done
+
+init_logging "doctor"
 
 check_command git required
 check_command tmux

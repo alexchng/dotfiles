@@ -20,5 +20,4 @@
 	lg = log --oneline --decorate --graph --all
 
 [include]
-	path = ~/.config/git/personal.gitconfig
-
+	path = ~/.config/git/tech.gitconfig

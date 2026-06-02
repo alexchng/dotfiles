@@ -24,7 +24,7 @@ Options:
   --dir PATH         Clone or use the repo at PATH
   --model MODEL      Claude model to launch
   --dry-run          Show actions without changing files
-  --force-dotfiles   Back up and replace existing dotfiles
+  --force-dotfiles   Back up and replace existing ~/.tmux.conf only
   --skip-dotfiles    Do not run scripts/bootstrap.sh
   --skip-mise        Do not run mise trust
   --skip-claude      Do not launch Claude Code
