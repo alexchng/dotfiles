@@ -14,6 +14,9 @@ DESIRED_SETTINGS = {
     "modelOverrides": {
         "claude-sonnet-4-6": "bedrock.claude-sonnet-4-6",
     },
+    "sandbox": {
+        "enabled": False,
+    },
 }
 
 
@@ -65,7 +68,7 @@ def main():
     merged = deep_merge(settings, DESIRED_SETTINGS.copy())
 
     if args.dry_run:
-        print(f"dry-run: merge Claude model preferences into {settings_path}")
+        print(f"dry-run: merge Claude preferences into {settings_path}")
         print(json.dumps(DESIRED_SETTINGS, indent=2, sort_keys=True))
         return 0
 

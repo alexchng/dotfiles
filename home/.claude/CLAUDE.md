@@ -22,10 +22,9 @@ assuming tools are available.
 
 ### Bash Sandbox
 
-The craft environment may not support the default Claude Code Bash sandbox
-because kernel user namespaces can be disabled. If shell commands fail with
-`bwrap: No permissions to create new namespace`, tell the user the Bash sandbox
-needs to be disabled for the session and use `/sandbox` to manage it.
+The craft environment does not support the default Claude Code Bash sandbox
+because kernel user namespaces can be disabled. The dotfiles bootstrap configures
+Claude Code with the Bash sandbox disabled in `~/.claude/settings.json`.
 
 ### Runtimes
 
@@ -37,22 +36,6 @@ Runtimes such as Node and Python are managed with `mise`.
   correct runtime is available even when the command runs from a new shell.
 - Run `mise trust` in a project only after confirming the repo is expected and
   trusted.
-
-### Dependency Installation
-
-When `sfw` is available, prefix dependency install commands with it to block
-known malicious packages in real time.
-
-| Instead of | Prefer |
-|---|---|
-| `npm install` | `sfw npm install` |
-| `npm ci` | `sfw npm ci` |
-| `pip install` | `sfw pip install` |
-| `pip install -r requirements.txt` | `sfw pip install -r requirements.txt` |
-
-If `sfw` is missing and dependency installation is required, ask before
-installing it globally. Airlift workspaces may not allow privileged installs, so
-do not assume global installation is possible.
 
 ## Airlift Proxy
 
@@ -68,7 +51,7 @@ To switch apps, unproxy first, then proxy the new port.
 
 Common ports:
 
-- docs or md-viewer: `3000`
+- JavaScript apps, SimpleDocs, or md-viewer: `3000`
 - Vite apps: `5173`
 - Streamlit apps: `8501`
 

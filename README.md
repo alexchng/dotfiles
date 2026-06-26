@@ -110,11 +110,12 @@ This repo includes personal Claude Code files in `home/.claude/`:
 - `commands/` for custom slash commands
 
 During bootstrap, `scripts/configure-claude-settings.py` merges a small set of
-safe model preferences into the real `~/.claude/settings.json`:
+safe preferences into the real `~/.claude/settings.json`:
 
 - default model: `sonnet`
 - Sonnet alias target: `bedrock.claude-sonnet-4-6`
 - model override: `claude-sonnet-4-6` to `bedrock.claude-sonnet-4-6`
+- Bash sandbox disabled via `sandbox.enabled = false`
 
 Keep secrets and machine-specific values out of this repo. The real Claude
 settings file may contain managed auth tokens, so it should stay local to the
