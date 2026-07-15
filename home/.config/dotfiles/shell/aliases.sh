@@ -14,5 +14,8 @@ alias ta='tmux attach -t'
 alias td='tmux detach'
 alias ts='tmux split-window -h \; split-window -v'
 
+alias rf='rm -rf'
+
 mkd() { mkdir -p "$1" && cd "$1"; }
+cc() { mkdir -p "$1" && cd "$1" && claude; }
 
