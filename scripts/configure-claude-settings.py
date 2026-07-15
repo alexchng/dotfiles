@@ -7,12 +7,12 @@ from pathlib import Path
 
 
 DESIRED_SETTINGS = {
-    "model": "sonnet",
+    "model": "opus",
     "env": {
-        "ANTHROPIC_DEFAULT_SONNET_MODEL": "bedrock.claude-sonnet-4-6",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": "bedrock.claude-opus-4-6[200k]",
     },
     "modelOverrides": {
-        "claude-sonnet-4-6": "bedrock.claude-sonnet-4-6",
+        "claude-opus-4-6": "bedrock.claude-opus-4-6[200k]",
     },
     "sandbox": {
         "enabled": False,

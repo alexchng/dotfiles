@@ -111,9 +111,9 @@ This repo includes personal Claude Code files in `home/.claude/`:
 During bootstrap, `scripts/configure-claude-settings.py` merges a small set of
 safe preferences into the real `~/.claude/settings.json`:
 
-- default model: `sonnet`
-- Sonnet alias target: `bedrock.claude-sonnet-4-6`
-- model override: `claude-sonnet-4-6` to `bedrock.claude-sonnet-4-6`
+- default model: `opus`
+- Opus alias target: `bedrock.claude-opus-4-6[200k]`
+- model override: `claude-opus-4-6` to `bedrock.claude-opus-4-6[200k]`
 - Bash sandbox disabled via `sandbox.enabled = false`
 
 Keep secrets and machine-specific values out of this repo. The real Claude
