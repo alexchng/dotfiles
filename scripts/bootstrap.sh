@@ -8,7 +8,6 @@ source "$DOTFILES_DIR/scripts/lib/logging.sh"
 DRY_RUN=false
 FORCE=false
 CONFIGURE_CLAUDE_SETTINGS=true
-CONFIGURE_CLAUDE_MD=true
 BACKUP_DIR="$HOME_DIR/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
 
 usage() {
@@ -19,9 +18,8 @@ Links files from ./home into $HOME.
 
 Options:
   --dry-run                Show actions without changing files
-  --force                  Back up and replace existing ~/.tmux.conf only
+  --force                  Back up and replace .tmux.conf and .claude/CLAUDE.md
   --skip-claude-settings   Do not merge Claude Code model preferences
-  --skip-claude-md         Do not install global CLAUDE.md
   --no-log                 Do not write a log file
   --log-file PATH          Write the log to PATH
   -h, --help               Show this help
@@ -223,11 +221,11 @@ link_file() {
   fi
 
   if [ -e "$target" ] || [ -L "$target" ]; then
-    if "$FORCE" && [ "$relative" = ".tmux.conf" ]; then
+    if "$FORCE" && { [ "$relative" = ".tmux.conf" ] || [ "$relative" = ".claude/CLAUDE.md" ]; }; then
       backup_target "$target"
     else
-      if [ "$relative" = ".tmux.conf" ]; then
-        log "skip $target (exists; use --force to replace tmux config)"
+      if [ "$relative" = ".tmux.conf" ] || [ "$relative" = ".claude/CLAUDE.md" ]; then
+        log "skip $target (exists; use --force to replace)"
       else
         log "skip $target (exists; leaving in place)"
       fi
@@ -249,9 +247,6 @@ while [ "$#" -gt 0 ]; do
       ;;
     --skip-claude-settings)
       CONFIGURE_CLAUDE_SETTINGS=false
-      ;;
-    --skip-claude-md)
-      CONFIGURE_CLAUDE_MD=false
       ;;
     --no-log)
       LOG_ENABLED=false
@@ -286,10 +281,6 @@ fi
 
 while IFS= read -r -d '' source; do
   local_relative="${source#$DOTFILES_DIR/home/}"
-  if ! "$CONFIGURE_CLAUDE_MD" && [ "$local_relative" = ".claude/CLAUDE.md" ]; then
-    log "skip CLAUDE.md (--skip-claude-md)"
-    continue
-  fi
   link_file "$source"
 done < <(find "$DOTFILES_DIR/home" -type f ! -name '.DS_Store' -print0)
 

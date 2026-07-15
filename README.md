@@ -18,7 +18,7 @@ is intentionally conservative:
 
 - existing files are skipped by default
 - `--dry-run` shows what would happen
-- `--force` backs up and replaces `~/.tmux.conf` only
+- `--force` backs up and replaces `~/.tmux.conf` and `~/.claude/CLAUDE.md`
 - existing `.zshrc` and `.bashrc` files get a small managed source block
   appended so aliases and environment preferences still load
 - an existing real `.gitconfig` gets a managed include block appended so Git
@@ -28,13 +28,12 @@ is intentionally conservative:
 - real `~/.claude/settings.json` is edited in place, not symlinked, so managed
   tokens stay out of the repo
 
-`--force` is intentionally scoped to tmux. If `~/.tmux.conf` already exists, it
-is moved to `~/.dotfiles-backup/<timestamp>/.tmux.conf` before the dotfiles
-symlink is created. Existing `~/.zshrc`, `~/.bashrc`, and `~/.gitconfig` files
-are not replaced; bootstrap appends managed blocks if the same settings are not
-already present. Other existing files under `home/`, such as
-`~/.claude/CLAUDE.md` and Claude command files, are still skipped and left in
-place.
+`--force` is scoped to `.tmux.conf` and `.claude/CLAUDE.md`. If either file
+already exists, it is moved to `~/.dotfiles-backup/<timestamp>/` before the
+dotfiles symlink is created. Existing `~/.zshrc`, `~/.bashrc`, and
+`~/.gitconfig` files are not replaced; bootstrap appends managed blocks if the
+same settings are not already present. Other existing files under `home/` are
+still skipped and left in place.
 
 The real Claude settings file, `~/.claude/settings.json`, is the exception: it
 is not linked from `home/`, so `--force` does not replace it either. Bootstrap
@@ -144,4 +143,4 @@ Useful options:
 ```
 
 `--force-dotfiles` passes the scoped `--force` behavior through to
-`bootstrap.sh`, so it only replaces an existing `~/.tmux.conf`.
+`bootstrap.sh`, replacing existing `~/.tmux.conf` and `~/.claude/CLAUDE.md`.
