@@ -9,10 +9,10 @@ from pathlib import Path
 DESIRED_SETTINGS = {
     "model": "opus",
     "env": {
-        "ANTHROPIC_DEFAULT_OPUS_MODEL": "bedrock.claude-opus-4-6[200k]",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": "bedrock.claude-opus-4-6",
     },
     "modelOverrides": {
-        "claude-opus-4-6": "bedrock.claude-opus-4-6[200k]",
+        "claude-opus-4-6": "bedrock.claude-opus-4-6",
     },
     "sandbox": {
         "enabled": False,
