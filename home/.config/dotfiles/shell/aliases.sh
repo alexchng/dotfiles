@@ -8,4 +8,9 @@ alias gl='git log --oneline --decorate --graph --all'
 alias gsw='git switch'
 
 alias t='tmux new-session -A -s main'
+alias tl='tmux ls'
+alias tk='tmux kill-session -t'
+alias ta='tmux attach -t'
+
+mkd() { mkdir -p "$1" && cd "$1"; }
 
