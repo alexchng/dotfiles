@@ -6,6 +6,8 @@ Ephemeral container. Tools/state may not persist between sessions.
 
 - Bash sandbox disabled (no kernel user namespaces). Configured in `~/.claude/settings.json`.
 - Runtimes not pre-installed. Use `mise use node`, `mise use python`, etc.
+- Use `mise exec -- <cmd>` to run commands with managed runtimes.
+- Kill app servers with `pkill -f <runtime>` (e.g. python, node, vite).
 - `glab` available for GitLab. Auth with 1-day token:
   `ssh git@<gitlab-host> personal_access_token <name> api 1`
   then `echo "<token>" | glab auth login --hostname <gitlab-host> --stdin`
