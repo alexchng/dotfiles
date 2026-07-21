@@ -10,7 +10,6 @@ CLAUDE_MODEL="${AIRDOCS_CLAUDE_MODEL:-claude-sonnet-4-6}"
 
 DRY_RUN=false
 RUN_DOTFILES=true
-FORCE_DOTFILES=false
 RUN_MISE=true
 RUN_CLAUDE=true
 
@@ -24,7 +23,6 @@ Options:
   --dir PATH         Clone or use the repo at PATH
   --model MODEL      Claude model to launch
   --dry-run          Show actions without changing files
-  --force-dotfiles   Back up and replace existing ~/.tmux.conf only
   --skip-dotfiles    Do not run scripts/bootstrap.sh
   --skip-mise        Do not run mise trust
   --skip-claude      Do not launch Claude Code
@@ -100,9 +98,6 @@ while [ "$#" -gt 0 ]; do
     --dry-run)
       DRY_RUN=true
       ;;
-    --force-dotfiles)
-      FORCE_DOTFILES=true
-      ;;
     --skip-dotfiles)
       RUN_DOTFILES=false
       ;;
@@ -129,9 +124,6 @@ if "$RUN_DOTFILES"; then
   bootstrap_args=()
   if "$DRY_RUN"; then
     bootstrap_args+=(--dry-run)
-  fi
-  if "$FORCE_DOTFILES"; then
-    bootstrap_args+=(--force)
   fi
   "$DOTFILES_DIR/scripts/bootstrap.sh" "${bootstrap_args[@]}"
 fi

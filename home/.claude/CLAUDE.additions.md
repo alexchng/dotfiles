@@ -1,0 +1,2 @@
+- Use `mise exec -- <cmd>` to run commands with managed runtimes.
+- Kill app servers with `pkill -f <runtime>` (e.g. python, node, vite).

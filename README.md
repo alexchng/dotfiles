@@ -18,27 +18,25 @@ is intentionally conservative:
 
 - existing files are skipped by default
 - `--dry-run` shows what would happen
-- `--force` backs up and replaces `~/.tmux.conf` and `~/.claude/CLAUDE.md`
 - existing `.zshrc` and `.bashrc` files get a small managed source block
   appended so aliases and environment preferences still load
 - an existing real `.gitconfig` gets a managed include block appended so Git
   preferences still load
-- an existing real `.tmux.conf` gets a managed `source-file` block appended;
-  existing tmux symlinks are left alone unless `--force` is used
+- an existing real `.tmux.conf` gets a managed `source-file` block appended
+  that sources the dotfiles tmux overlay
+- an existing real `~/.claude/CLAUDE.md` gets extra hints appended from
+  `home/.claude/CLAUDE.additions.md`
 - real `~/.claude/settings.json` is edited in place, not symlinked, so managed
   tokens stay out of the repo
 
-`--force` is scoped to `.tmux.conf` and `.claude/CLAUDE.md`. If either file
-already exists, it is moved to `~/.dotfiles-backup/<timestamp>/` before the
-dotfiles symlink is created. Existing `~/.zshrc`, `~/.bashrc`, and
-`~/.gitconfig` files are not replaced; bootstrap appends managed blocks if the
-same settings are not already present. Other existing files under `home/` are
-still skipped and left in place.
+All append hooks are idempotent: they check for a marker before writing and
+skip if already present. Existing `~/.zshrc`, `~/.bashrc`, `~/.gitconfig`,
+`~/.tmux.conf`, and `~/.claude/CLAUDE.md` are never replaced — bootstrap only
+appends managed blocks. Other existing files under `home/` are skipped and left
+in place.
 
-The real Claude settings file, `~/.claude/settings.json`, is the exception: it
-is not linked from `home/`, so `--force` does not replace it either. Bootstrap
-merges safe model preferences into that file in place unless
-`--skip-claude-settings` is used.
+Bootstrap merges safe model preferences into `~/.claude/settings.json` in place
+unless `--skip-claude-settings` is used.
 
 This repo does not install system packages or global tools. It assumes the
 remote workspace image already provides tools such as `git`, `tmux`, `mise`, and
@@ -104,7 +102,7 @@ t
 
 This repo includes personal Claude Code files in `home/.claude/`:
 
-- `CLAUDE.md` for global memory and working preferences
+- `CLAUDE.additions.md` — extra hints appended to the existing `~/.claude/CLAUDE.md`
 - `settings.example.json` as a non-secret example of desired settings
 - `commands/` for custom slash commands
 
@@ -139,8 +137,4 @@ Useful options:
 ```sh
 ~/.dotfiles/scripts/workspaces/airdocs.sh --dir ~/airdocs
 ~/.dotfiles/scripts/workspaces/airdocs.sh --skip-claude
-~/.dotfiles/scripts/workspaces/airdocs.sh --force-dotfiles
 ```
-
-`--force-dotfiles` passes the scoped `--force` behavior through to
-`bootstrap.sh`, replacing existing `~/.tmux.conf` and `~/.claude/CLAUDE.md`.

@@ -6,9 +6,7 @@ HOME_DIR="${HOME:?HOME is not set}"
 source "$DOTFILES_DIR/scripts/lib/logging.sh"
 
 DRY_RUN=false
-FORCE=false
 CONFIGURE_CLAUDE_SETTINGS=true
-BACKUP_DIR="$HOME_DIR/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
 
 usage() {
   cat <<'USAGE'
@@ -18,7 +16,6 @@ Links files from ./home into $HOME.
 
 Options:
   --dry-run                Show actions without changing files
-  --force                  Back up and replace .tmux.conf and .claude/CLAUDE.md
   --skip-claude-settings   Do not merge Claude Code model preferences
   --no-log                 Do not write a log file
   --log-file PATH          Write the log to PATH
@@ -157,6 +154,43 @@ append_tmux_hook() {
   log "append dotfiles tmux hook to $target"
 }
 
+append_claude_hook() {
+  local target="$HOME_DIR/.claude/CLAUDE.md"
+  local additions="$DOTFILES_DIR/home/.claude/CLAUDE.additions.md"
+  local begin_marker="<!-- >>> dotfiles claude setup >>> -->"
+  local end_marker="<!-- <<< dotfiles claude setup <<< -->"
+
+  if [ -L "$target" ]; then
+    log "skip claude hook $target (symlink)"
+    return
+  fi
+
+  if [ ! -e "$target" ]; then
+    return
+  fi
+
+  if [ ! -r "$additions" ]; then
+    log "skip claude hook ($additions not found)"
+    return
+  fi
+
+  if grep -Fq "$begin_marker" "$target"; then
+    log "claude hook already present in $target; skip append"
+    return
+  fi
+
+  if "$DRY_RUN"; then
+    log "dry-run: append dotfiles claude hook to $target"
+  else
+    {
+      printf '\n%s\n' "$begin_marker"
+      cat "$additions"
+      printf '%s\n' "$end_marker"
+    } >> "$target"
+  fi
+  log "append dotfiles claude hook to $target"
+}
+
 configure_claude_settings() {
   local script="$DOTFILES_DIR/scripts/configure-claude-settings.py"
   local args=()
@@ -192,16 +226,6 @@ configure_claude_settings() {
   return "$status"
 }
 
-backup_target() {
-  local target="$1"
-  local relative="${target#$HOME_DIR/}"
-  local backup="$BACKUP_DIR/$relative"
-
-  run mkdir -p "$(dirname "$backup")"
-  run mv "$target" "$backup"
-  log "backed up $target -> $backup"
-}
-
 link_file() {
   local source="$1"
   local relative="${source#$DOTFILES_DIR/home/}"
@@ -221,16 +245,8 @@ link_file() {
   fi
 
   if [ -e "$target" ] || [ -L "$target" ]; then
-    if "$FORCE" && { [ "$relative" = ".tmux.conf" ] || [ "$relative" = ".claude/CLAUDE.md" ]; }; then
-      backup_target "$target"
-    else
-      if [ "$relative" = ".tmux.conf" ] || [ "$relative" = ".claude/CLAUDE.md" ]; then
-        log "skip $target (exists; use --force to replace)"
-      else
-        log "skip $target (exists; leaving in place)"
-      fi
-      return
-    fi
+    log "skip $target (exists; leaving in place)"
+    return
   fi
 
   run ln -s "$source" "$target"
@@ -241,9 +257,6 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
     --dry-run)
       DRY_RUN=true
-      ;;
-    --force)
-      FORCE=true
       ;;
     --skip-claude-settings)
       CONFIGURE_CLAUDE_SETTINGS=false
@@ -288,6 +301,7 @@ append_shell_hook "$HOME_DIR/.zshrc"
 append_shell_hook "$HOME_DIR/.bashrc"
 append_git_hook
 append_tmux_hook
+append_claude_hook
 
 if "$CONFIGURE_CLAUDE_SETTINGS"; then
   configure_claude_settings
