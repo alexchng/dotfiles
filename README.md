@@ -3,6 +3,37 @@
 Personal dotfiles for turning a fresh dev box or remote workspace into a familiar
 environment quickly.
 
+## Shell Aliases
+
+Sourced automatically from `home/.config/dotfiles/shell/aliases.sh`:
+
+| Alias | Command | Description |
+|-------|---------|-------------|
+| `ll` | `ls -lah` | Long listing, all files, human-readable sizes |
+| `la` | `ls -A` | List all except `.` and `..` |
+| `l` | `ls -CF` | Compact columns with type indicators |
+| `gs` | `git status -sb` | Short status with branch |
+| `gd` | `git diff` | Show unstaged changes |
+| `gl` | `git log --oneline --decorate --graph --all` | Visual log of all branches |
+| `gsw` | `git switch` | Switch branches |
+| `gc` | `git clone` | Clone a repository |
+| `t` | `tmux new-session -A -s main` | Start or attach to main session |
+| `tl` | `tmux ls` | List sessions |
+| `tk` | `tmux kill-session -t` | Kill a session |
+| `ta` | `tmux attach -t` | Attach to a session |
+| `td` | `tmux detach` | Detach from session |
+| `ts` | `tmux split-window -h \; split-window -v` | Split into three panes |
+| `home` | `cd ~` | Go to home directory |
+| `work` | `cd ~/workspace` | Go to workspace directory |
+| `rf` | `rm -rf` | Force remove |
+
+**Functions:**
+
+| Name | Description |
+|------|-------------|
+| `mkd <dir>` | Create directory and cd into it |
+| `cc <dir>` | Create directory, cd into it, and start Claude |
+
 ## Quick Start
 
 Clone this repo somewhere stable, then run the bootstrap script:
