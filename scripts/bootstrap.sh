@@ -297,6 +297,9 @@ while IFS= read -r -d '' source; do
   link_file "$source"
 done < <(find "$DOTFILES_DIR/home" -type f ! -name '.DS_Store' -print0)
 
+run mkdir -p "$HOME_DIR/workspace"
+log "ensure $HOME_DIR/workspace exists"
+
 append_shell_hook "$HOME_DIR/.zshrc"
 append_shell_hook "$HOME_DIR/.bashrc"
 append_git_hook
