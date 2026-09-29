@@ -1,7 +1,8 @@
 {
-  "model": "sonnet",
+  "model": "bedrock.claude-opus-4-8",
   "env": {
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "bedrock.claude-sonnet-4-6"
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "bedrock.claude-sonnet-4-6",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "bedrock.claude-opus-4-8"
   },
   "sandbox": {
     "enabled": false
