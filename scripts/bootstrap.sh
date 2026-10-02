@@ -191,6 +191,43 @@ append_claude_hook() {
   log "append dotfiles claude hook to $target"
 }
 
+# Global instruction files for other coding agents. Each one links to the
+# Airlift-managed ~/.claude/CLAUDE.md so all agents share one source of truth.
+AGENT_INSTRUCTION_TARGETS=(
+  ".codex/AGENTS.md"
+  ".pi/agent/AGENTS.md"
+  ".config/opencode/AGENTS.md"
+)
+
+link_agent_instructions() {
+  local source="$HOME_DIR/.claude/CLAUDE.md"
+  local relative
+  local target
+
+  if [ ! -e "$source" ]; then
+    log "skip agent instruction links ($source not found)"
+    return
+  fi
+
+  for relative in "${AGENT_INSTRUCTION_TARGETS[@]}"; do
+    target="$HOME_DIR/$relative"
+
+    if [ -L "$target" ] && [ "$(readlink "$target")" = "$source" ]; then
+      log "linked $target"
+      continue
+    fi
+
+    if [ -e "$target" ] || [ -L "$target" ]; then
+      log "skip $target (exists; leaving in place)"
+      continue
+    fi
+
+    run mkdir -p "$(dirname "$target")"
+    run ln -s "$source" "$target"
+    log "link $target -> $source"
+  done
+}
+
 configure_claude_settings() {
   local script="$DOTFILES_DIR/scripts/configure-claude-settings.py"
   local args=()
@@ -305,6 +342,7 @@ append_shell_hook "$HOME_DIR/.bashrc"
 append_git_hook
 append_tmux_hook
 append_claude_hook
+link_agent_instructions
 
 if "$CONFIGURE_CLAUDE_SETTINGS"; then
   configure_claude_settings

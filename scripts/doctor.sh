@@ -73,6 +73,24 @@ check_link() {
   fi
 }
 
+check_agent_instructions() {
+  local source="$HOME_DIR/.claude/CLAUDE.md"
+  local relative
+  local target
+
+  for relative in .codex/AGENTS.md .pi/agent/AGENTS.md .config/opencode/AGENTS.md; do
+    target="$HOME_DIR/$relative"
+    if [ -L "$target" ] && [ "$(readlink "$target")" = "$source" ]; then
+      log "ok   agent link $target"
+    elif [ -e "$target" ] || [ -L "$target" ]; then
+      log "warn exists but not linked $target"
+    else
+      log "miss agent link $target"
+      status=1
+    fi
+  done
+}
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --no-log)
@@ -110,5 +128,7 @@ check_command claude
 while IFS= read -r -d '' source; do
   check_link "$source"
 done < <(find "$DOTFILES_DIR/home" -type f ! -name '.DS_Store' -print0)
+
+check_agent_instructions
 
 exit "$status"

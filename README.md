@@ -149,6 +149,28 @@ Keep secrets and machine-specific values out of this repo. The real Claude
 settings file may contain managed auth tokens, so it should stay local to the
 workspace.
 
+## Other Coding Agents
+
+Airlift writes the workspace instructions to `~/.claude/CLAUDE.md`. Bootstrap
+shares that file with other coding agents:
+
+- `home/AGENTS.md` is linked to `~/AGENTS.md`. It tells agents that read
+  parent directories to read `~/.claude/CLAUDE.md`.
+- These global instruction files are symlinked to `~/.claude/CLAUDE.md`:
+
+| Agent | Global file |
+|-------|-------------|
+| Codex CLI | `~/.codex/AGENTS.md` |
+| Pi | `~/.pi/agent/AGENTS.md` |
+| opencode | `~/.config/opencode/AGENTS.md` |
+
+Existing files are left in place. To add another agent, add its path to
+`AGENT_INSTRUCTION_TARGETS` in `scripts/bootstrap.sh` and to
+`check_agent_instructions` in `scripts/doctor.sh`.
+
+In a project repository, put shared rules in `AGENTS.md` and add a `CLAUDE.md`
+that contains only `@AGENTS.md`, so Claude Code reads the same rules.
+
 ## Airdocs Workspace
 
 The Airdocs bootstrap captures the remote workspace flow:
