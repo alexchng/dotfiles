@@ -1,9 +1,73 @@
 {
-  "model": "bedrock.claude-opus-4-8",
+  "model": "bedrock.claude-opus-5-5",
   "env": {
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "bedrock.claude-sonnet-4-6",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "bedrock.claude-opus-4-8"
+    "CLAUDE_CODE_USE_BEDROCK": "0",
+    "CLAUDE_CODE_USE_FOUNDRY": "0",
+    "CLAUDE_CODE_USE_MANTLE": "0",
+    "CLAUDE_CODE_USE_VERTEX": "0",
+    "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS": "1",
+    "DISABLE_BUG_COMMAND": "1",
+    "DISABLE_ERROR_REPORTING": "1",
+    "DISABLE_TELEMETRY": "1",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "bedrock.claude-haiku-5-5",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "bedrock.claude-sonnet-5-5",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "bedrock.claude-opus-5-5",
+    "ANTHROPIC_DEFAULT_MODEL": "bedrock.claude-sonnet-5-5"
   },
+  "modelOverrides": {
+    "claude-haiku-4-5-20251001": "bedrock.claude-haiku-4-5",
+    "claude-sonnet-4-5-20250929": "bedrock.claude-sonnet-4-5",
+    "claude-sonnet-4-6": "bedrock.claude-sonnet-4-6",
+    "claude-opus-4-5-20251101": "bedrock.claude-opus-4-5",
+    "claude-opus-4-6": "bedrock.claude-opus-4-6",
+    "claude-opus-4-7": "bedrock.claude-opus-4-7",
+    "claude-opus-4-8": "bedrock.claude-opus-4-8",
+    "claude-opus-5": "bedrock.claude-opus-5",
+    "claude-opus-5-5": "bedrock.claude-opus-5-5",
+    "claude-sonnet-5": "bedrock.claude-sonnet-5",
+    "claude-sonnet-5-5": "bedrock.claude-sonnet-5-5",
+    "claude-haiku-5-5": "bedrock.claude-haiku-5-5"
+  },
+  "modelPicker": {
+    "options": [
+      {
+        "model": "bedrock.claude-sonnet-5-5",
+        "label": "Sonnet 5.5",
+        "description": "Sonnet 5.5 · Efficient for routine tasks"
+      },
+      {
+        "model": "bedrock.claude-opus-5-5",
+        "label": "Opus 5.5",
+        "description": "Opus 5.5 · For complex work · Costs more than Sonnet"
+      },
+      {
+        "model": "bedrock.claude-haiku-5-5",
+        "label": "Haiku 5.5",
+        "description": "Haiku 5.5 · Fastest for quick answers · Costs less than Sonnet"
+      },
+      {
+        "model": "bedrock.claude-sonnet-4-6",
+        "label": "Sonnet 4.6",
+        "description": "Sonnet 4.6"
+      },
+      {
+        "model": "bedrock.claude-opus-4-8",
+        "label": "Opus 4.8",
+        "description": "Opus 4.8"
+      }
+    ],
+    "replaceBuiltInOptions": true
+  },
+  "modelSettings": {
+    "claude-haiku-5-5": { "effortLevel": "medium", "maxEffortLevel": "high" },
+    "claude-opus-5-5": { "effortLevel": "medium", "maxEffortLevel": "high" },
+    "claude-sonnet-5-5": { "effortLevel": "medium", "maxEffortLevel": "high" }
+  },
+  "effortLevel": "medium",
+  "autoCompactEnabled": true,
+  "autoCompactWindow": 300000,
+  "theme": "light",
+  "enableAllProjectMcpServers": false,
   "sandbox": {
     "enabled": false
   },

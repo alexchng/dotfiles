@@ -6,7 +6,7 @@ HOME_DIR="${HOME:?HOME is not set}"
 source "$DOTFILES_DIR/scripts/lib/logging.sh"
 
 DRY_RUN=false
-CONFIGURE_CLAUDE_SETTINGS=true
+CONFIGURE_CLAUDE_SETTINGS=false
 
 usage() {
   cat <<'USAGE'
@@ -15,11 +15,12 @@ Usage: scripts/bootstrap.sh [options]
 Links files from ./home into $HOME.
 
 Options:
-  --dry-run                Show actions without changing files
-  --skip-claude-settings   Do not merge Claude Code model preferences
-  --no-log                 Do not write a log file
-  --log-file PATH          Write the log to PATH
-  -h, --help               Show this help
+  --dry-run                    Show actions without changing files
+  --configure-claude-settings  Merge Claude Code preferences into
+                               ~/.claude/settings.json (overwrites matching keys)
+  --no-log                     Do not write a log file
+  --log-file PATH              Write the log to PATH
+  -h, --help                   Show this help
 USAGE
 }
 
@@ -295,8 +296,8 @@ while [ "$#" -gt 0 ]; do
     --dry-run)
       DRY_RUN=true
       ;;
-    --skip-claude-settings)
-      CONFIGURE_CLAUDE_SETTINGS=false
+    --configure-claude-settings)
+      CONFIGURE_CLAUDE_SETTINGS=true
       ;;
     --no-log)
       LOG_ENABLED=false

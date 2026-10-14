@@ -67,7 +67,7 @@ appends managed blocks. Other existing files under `home/` are skipped and left
 in place.
 
 Bootstrap merges safe model preferences into `~/.claude/settings.json` in place
-unless `--skip-claude-settings` is used.
+only when `--configure-claude-settings` is passed.
 
 This repo does not install system packages or global tools. It assumes the
 remote workspace image already provides tools such as `git`, `tmux`, `mise`, and
@@ -137,13 +137,26 @@ This repo includes personal Claude Code files in `home/.claude/`:
 - `settings.example.json` as a non-secret example of desired settings
 - `commands/` for custom slash commands
 
-During bootstrap, `scripts/configure-claude-settings.py` merges a small set of
-safe preferences into the real `~/.claude/settings.json`:
+When bootstrap runs with `--configure-claude-settings` (off by default),
+`scripts/configure-claude-settings.py` merges a set of preferences into the
+real `~/.claude/settings.json`, overwriting any matching keys. Preview with
+`scripts/bootstrap.sh --dry-run --configure-claude-settings`:
 
-- default model: `opus`
-- Opus alias target: `bedrock.claude-opus-4-6[200k]`
-- model override: `claude-opus-4-6` to `bedrock.claude-opus-4-6[200k]`
-- Bash sandbox disabled via `sandbox.enabled = false`
+- default model: `bedrock.claude-opus-5-5` (Sonnet, Opus, and Haiku defaults
+  point at the 5.5 Bedrock models)
+- `modelOverrides` mapping Claude model IDs (4.5 through 5.5) to Bedrock IDs
+- `modelPicker` and per-model `modelSettings` (medium effort, max high)
+- provider flags off, experimental betas, telemetry, error reporting, and the
+  bug command disabled
+- `effortLevel`, auto-compact (300k window), `theme`, and project MCP servers
+  not auto-enabled
+- Bash sandbox disabled via `sandbox.enabled = false`, because Airlift
+  containers have no kernel user namespaces
+
+Managed values (OTEL telemetry and tokens, MCP allowlists, company
+announcements, bypass-permissions lockout, macOS sandbox paths) are
+deliberately not set here. The example file also carries `permissions.deny`
+rules for secret files, which the merge script does not apply.
 
 Keep secrets and machine-specific values out of this repo. The real Claude
 settings file may contain managed auth tokens, so it should stay local to the
