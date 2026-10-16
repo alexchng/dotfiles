@@ -9,6 +9,7 @@ alias gsw='git switch'
 alias gc='git clone'
 
 alias t='tmux new-session -A -s main'
+alias tn='tmux new-session -s'
 alias tl='tmux ls'
 alias tk='tmux kill-session -t'
 alias ta='tmux attach -t'

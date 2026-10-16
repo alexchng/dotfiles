@@ -18,6 +18,7 @@ Sourced automatically from `home/.config/dotfiles/shell/aliases.sh`:
 | `gsw` | `git switch` | Switch branches |
 | `gc` | `git clone` | Clone a repository |
 | `t` | `tmux new-session -A -s main` | Start or attach to main session |
+| `tn` | `tmux new-session -s` | Create a new named session |
 | `tl` | `tmux ls` | List sessions |
 | `tk` | `tmux kill-session -t` | Kill a session |
 | `ta` | `tmux attach -t` | Attach to a session |
